@@ -32,7 +32,12 @@ exports.getReview = asyncHandler(async (req, res, next) => {
 //add review
 // route /api/v1/products/prpductId/reviews
 exports.addReview = asyncHandler(async (req, res, next) => {
+  req.body.user = req.user.id;
   req.body.product = req.params.productId;
+  req.body.user = req.user.id;
+  if (req.user.role !== "user") {
+    return next(new ErrorResponse(`Not authorized to add review`, 401));
+  }
   const product = await Product.findById(req.params.productId);
   if (!product) {
     return next(new ErrorResponse(`no product found with this id`, 404));
@@ -47,6 +52,11 @@ exports.updateReviews = asyncHandler(async (req, res, next) => {
   if (!review) {
     return next(new ErrorResponse(`no review found with this id`, 404));
   }
+  if (review.user.toString() !== req.user.id || req.user.role !== "user") {
+    return next(
+      new ErrorResponse(`user role not authorize to update this review`, 401)
+    );
+  }
   review = await Review.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
@@ -54,6 +64,7 @@ exports.updateReviews = asyncHandler(async (req, res, next) => {
   await review.save();
   return res.status(200).json({ success: true, data: review });
 });
+/*
 // delete reviews
 // route /api/v1/rerviews/:id
 exports.deleteReviews = asyncHandler(async (req, res, next) => {
@@ -61,6 +72,11 @@ exports.deleteReviews = asyncHandler(async (req, res, next) => {
   if (!review) {
     return next(new ErrorResponse(`no review found with this id`, 404));
   }
+  if (review.user.toString() !== req.user.id || req.user.role !== "user") {
+    return next(
+      new ErrorResponse(`user role not authorize to delete this review`, 401)
+    );
+  }
   await review.remove();
   return res.status(200).json({ success: true, data: {} });
-});
+});*/

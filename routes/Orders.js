@@ -3,7 +3,11 @@ const router = express.Router({ mergeParams: true });
 const advancedResults = require("../middleware/queries");
 const Order = require("../models/Orders");
 
-const { getOrders, getOrder } = require("../controllers/orders");
+const {
+  getOrders,
+  getOrder,
+  getOrdersByUser,
+} = require("../controllers/orders");
 const { acceessRoles, protect } = require("../middleware/auth");
 
 router
@@ -13,6 +17,7 @@ router
     getOrders
   );
 router.route("/:id").get(getOrder);
+router.route("/user").get(protect, getOrdersByUser);
 //router.route("/:id").get(getOrder).put(updateOrder).delete(removeOrder);
 
 module.exports = router;

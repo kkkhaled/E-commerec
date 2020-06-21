@@ -4,6 +4,7 @@ const asyncHandler = require("../middleware/ascyncHandler");
 //const advancedQueries = require("../middleware/queries");
 const User = require("../models/User");
 const Product = require("../models/Products");
+const mongoose = require("mongoose");
 
 //Get all products
 //route /api/v1/products
@@ -29,7 +30,9 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 //Get products for single user
 //route /api/v1/products/user
 exports.getProductsByUser = asyncHandler(async (req, res, next) => {
-  const products = await Product.find({ user: req.user.id });
+  const products = await Product.find(
+    mongoose.Types.Object(req.user.id)
+  ).exec();
   if (!products) {
     return next(new ErrorResponse(`no products found for this user`, 404));
   }
@@ -57,6 +60,10 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
 //Create Product
 //route /api/v1/products
 exports.addProduct = asyncHandler(async (req, res, next) => {
+  req.body.user = req.user.id;
+  if (req.user.role !== "admin") {
+    return next(new ErrorResponse(`Not authorized to add product`, 401));
+  }
   const product = await Product.create(req.body);
   return res.status(201).json({ success: true, data: product });
 });
@@ -70,6 +77,11 @@ exports.uploadImage = asyncHandler(async (req, res, next) => {
         `Product not found with this id : ${req.params.id}`,
         404
       )
+    );
+  }
+  if (product.user.toString() !== req.user.id || req.user.role !== "admin") {
+    return next(
+      new ErrorResponse(`user role not authorize to access this route`)
     );
   }
   if (!req.files) {
@@ -106,6 +118,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
       )
     );
   }
+  if (product.user.toString() !== req.user.id || req.user.role !== "admin") {
+    return next(
+      new ErrorResponse(`user role not authorize to access this route`)
+    );
+  }
   product = await Product.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
     runValidators: true,
@@ -125,6 +142,11 @@ exports.deleteProduct = asyncHandler(async (req, res, next) => {
         `Prouduct not found with this id : ${req.params.id}`,
         404
       )
+    );
+  }
+  if (product.user.toString() !== req.user.id || req.user.role !== "admin") {
+    return next(
+      new ErrorResponse(`user role not authorize to access this route`)
     );
   }
   await product.remove();

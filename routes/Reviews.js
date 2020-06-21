@@ -7,7 +7,7 @@ const Review = require("../models/Reviews");
 const {
   getReviews,
   updateReviews,
-  deleteReviews,
+  // deleteReviews,
   getReview,
 } = require("../controllers/reviews");
 
@@ -23,7 +23,7 @@ router
 router
   .route("/:id")
   .put(protect, acceessRoles("user"), updateReviews)
-  .delete(protect, acceessRoles("user"), deleteReviews)
+  // .delete(protect, acceessRoles("user"), deleteReviews)
   .get(getReview);
 
 module.exports = router;

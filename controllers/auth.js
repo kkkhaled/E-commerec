@@ -3,6 +3,7 @@ const ErrorResponse = require("../utils/errorResponse");
 const Mailer = require("../utils/sendEmail");
 const asyncHandler = require("../middleware/ascyncHandler");
 const forgetpassTemplate = require("../templates/forgotPass");
+const crypto = require("crypto");
 
 // register users
 // route /api/v1/auth/register
@@ -20,7 +21,7 @@ exports.login = asyncHandler(async (req, res, next) => {
     return next(new ErrorResponse(`email and password is required`, 400));
   }
   //get user by email
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).select("+password");
   if (!user) {
     return next(new ErrorResponse(`invalid email`, 400));
   }
@@ -41,7 +42,7 @@ exports.getme = asyncHandler(async (req, res, next) => {
   });
 });
 // update account data
-// route /api/v1/auth/updatedata/:id
+// route /api/v1/auth/updatedata
 exports.updateAccount = asyncHandler(async (req, res, next) => {
   const fieldToUpdate = {
     username: req.body.username,
@@ -61,7 +62,7 @@ exports.updateAccount = asyncHandler(async (req, res, next) => {
 // route /api/v1/auth/updatePassword
 exports.updatePassword = asyncHandler(async (req, res, next) => {
   const user = await User.findById(req.user.id).select("+password");
-  if (!user.MatchPass(req.body.currentPassword)) {
+  if (!(await user.MatchPass(req.body.currentPassword))) {
     return next(new ErrorResponse("Password is incorrect", 401));
   }
 

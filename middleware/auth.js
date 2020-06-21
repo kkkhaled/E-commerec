@@ -1,10 +1,27 @@
 const jwt = require("jsonwebtoken");
-const asyncHandler = require("./ascyncHandler.js");
+//const asyncHandler = require("./ascyncHandler.js");
 const ErrorResponse = require("../utils/errorResponse");
 const User = require("../models/User");
 
-exports.protect = asyncHandler(async (req, res, next) => {
-  let token;
+exports.protect = async (req, res, next) => {
+  const token = req.header("x-auth-token");
+
+  // Check if not token
+  if (!token) {
+    return res.status(401).json({ msg: "No token, authorization denied" });
+  }
+
+  // Verify token
+  try {
+    const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+    req.user = await User.findById(decoded.id);
+    console.log(decoded);
+    next();
+  } catch (err) {
+    return next(new ErrorResponse("Not authorized to access this route", 401));
+  }
+};
+/* let token;
   if (
     req.headers.authorization ||
     req.headers.authorization.startsWith("Bearer")
@@ -17,11 +34,12 @@ exports.protect = asyncHandler(async (req, res, next) => {
   try {
     const decoded = await jwt.verify(token, process.env.JWT_SECRET);
     req.user = await User.findById(decoded.id);
+    console.log(decoded);
     next();
   } catch (err) {
     return next(new ErrorResponse("Not authorized to access this route", 401));
-  }
-});
+  }*/
+
 // access to roles autherization
 exports.acceessRoles = (...roles) => {
   return (req, res, next) => {
@@ -29,9 +47,10 @@ exports.acceessRoles = (...roles) => {
       return next(
         new ErrorResponse(
           `User role ${req.user.role} is not authorized to access this route`,
-          401
+          403
         )
       );
     }
+    next();
   };
 };

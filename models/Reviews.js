@@ -23,11 +23,11 @@ const reviewSchema = mongoose.Schema({
   user: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    // required: true,
+    required: true,
   },
 });
 // limiting user to adding only one review
-// reviewSchema.index({ bootcamp: 1, user: 1 }, { unique: true });
+reviewSchema.index({ product: 1, user: 1 }, { unique: true });
 
 //static method to get average rating of reviews
 reviewSchema.statics.getAverageRating = async function (productId) {
@@ -54,7 +54,8 @@ reviewSchema.post("save", async function () {
 });
 
 // Call getAverageRate after remove
+/*
 reviewSchema.post("remove", async function () {
   await this.constructor.getAverageRating(this.product);
-});
+});*/
 module.exports = mongoose.model("Review", reviewSchema);

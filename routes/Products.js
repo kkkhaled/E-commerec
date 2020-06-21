@@ -9,6 +9,7 @@ const {
   uploadImage,
   updateProduct,
   deleteProduct,
+  getProductsByUser,
 } = require("../controllers/products");
 
 const {
@@ -28,7 +29,8 @@ const { acceessRoles, protect } = require("../middleware/auth");
 router
   .route("/")
   .get(advancedResults(Product, "orders"), getProducts)
-  .post(addProduct);
+  .post(protect, acceessRoles("admin"), addProduct);
+
 router.route("/:id").get(getProduct);
 router.route("/:id/image").put(protect, acceessRoles("admin"), uploadImage);
 router.route("/:id").put(protect, acceessRoles("admin"), updateProduct);
@@ -36,14 +38,17 @@ router.route("/:id").delete(protect, acceessRoles("admin"), deleteProduct);
 
 router
   .route("/:productId/order")
-  .post(protect, acceessRoles("admin", "user"), addOrder)
-  .put(protect, acceessRoles("admin", "user"), updateOrder)
-  .delete(protect, acceessRoles("admin", "user"), removeOrder)
-  .get(protect, acceessRoles("admin", "user"), getOrderByProduct);
+  .post(protect, addOrder)
+  .put(protect, updateOrder)
+  .delete(protect, removeOrder)
+  .get(protect, getOrderByProduct);
 
 router
   .route("/:productId/review")
   .get(getReviewByProduct)
   .post(protect, acceessRoles("user"), addReview);
+
+//find profducts for specific user
+router.route("/user").get(protect, getProductsByUser);
 
 module.exports = router;

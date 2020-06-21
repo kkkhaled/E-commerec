@@ -46,6 +46,7 @@ userSchema.methods.createToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
+  console.log(this);
 };
 // bcrypt password
 userSchema.pre("save", async function (next) {
@@ -62,7 +63,7 @@ userSchema.methods.MatchPass = async function (enteredpassword) {
   return await bcrypt.compare(enteredpassword, this.password);
 };
 // create reset password token
-userSchema.methods.createPasswordToken = async function () {
+userSchema.methods.createPasswordToken = function () {
   // Generate token
   const resetToken = crypto.randomBytes(20).toString("hex");
 
@@ -73,7 +74,7 @@ userSchema.methods.createPasswordToken = async function () {
     .digest("hex");
 
   // Set expire
-  this.resetPasswordExpire = Date.now() + 10 * 60 * 1000;
+  this.resetPasswordExpire = Date.now() + 15 * 60 * 1000;
 
   return resetToken;
 };
