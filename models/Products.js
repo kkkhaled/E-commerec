@@ -70,7 +70,7 @@ productSchema.pre("remove", async function (next) {
   await this.model("Order").deleteMany({ product: this._id });
   next();
 });
-//Delete order after delete products
+//Delete reviews after delete products
 productSchema.pre("remove", async function (next) {
   console.log(`reviews have been removed `);
   await this.model("Review").deleteMany({ product: this._id });

@@ -20,7 +20,7 @@ exports.getLocations = asyncHandler(async (req, res, next) => {
 //getlocations for specific user
 //route /api/v1/location/user
 exports.gettUserLocation = asyncHandler(async (req, res, next) => {
-  const locs = await Location.find({ user: req.user.id });
+  const locs = await Location.find({ user: req.user.id }).exec();
   if (!locs) {
     return next(new ErrorResponse(`no locs for his user please add one`, 404));
   }
@@ -31,24 +31,26 @@ exports.gettUserLocation = asyncHandler(async (req, res, next) => {
 exports.getLocationById = asyncHandler(async (req, res, next) => {
   const loc = await Location.findById(req.params.id);
   if (!loc) {
-    return next(new ErrorResponse(`no location found please add onre`, 404));
+    return next(new ErrorResponse(`no location found please add one`, 404));
   }
   res.status(200).json({ success: true, length: loc.length, data: loc });
 });
 // create locatiion for specific user
 //route /api/v1/locations
 exports.addLocation = asyncHandler(async (req, res, next) => {
-  // req.body.user = req.user.id;
+  req.body.user = req.user.id;
   const loc = await Location.create(req.body);
   res.status(201).json({ success: true, length: loc.length, data: loc });
 });
 //update locaion
 // route /api/v1/location/:id
 exports.updateLocation = asyncHandler(async (req, res, next) => {
-  // req.body.user = req.user.id;
   let loc = await Location.findById(req.params.id);
   if (!loc) {
     return next(new ErrorResponse(`no location found please add onre`, 404));
+  }
+  if (loc.user.toString() !== req.user.id) {
+    return next(new ErrorResponse(`user not authorize to access this route`));
   }
   loc = await Location.findByIdAndUpdate(req.params.id, req.body, {
     new: true,
@@ -61,7 +63,10 @@ exports.updateLocation = asyncHandler(async (req, res, next) => {
 exports.deleteLocation = asyncHandler(async (req, res, next) => {
   let loc = await Location.findById(req.params.id);
   if (!loc) {
-    return next(new ErrorResponse(`no location found please add onre`, 404));
+    return next(new ErrorResponse(`no location found please add one`, 404));
+  }
+  if (loc.user.toString() !== req.user.id) {
+    return next(new ErrorResponse(`user not authorize to access this route`));
   }
   await loc.remove();
   res.status(200).json({ success: true, data: {} });

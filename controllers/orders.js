@@ -40,7 +40,7 @@ exports.getOrder = asyncHandler(async (req, res, next) => {
 //route /api/v1/products/:productId/order
 exports.getOrderByProduct = asyncHandler(async (req, res, next) => {
   //getting orders by product
-  let order = await Order.find({ product: req.params.productId }).exec();
+  let order = await Order.findOne({ product: req.params.productId }).exec();
   //check order
   if (!order) {
     return next(
@@ -97,9 +97,7 @@ exports.updateOrder = asyncHandler(async (req, res, next) => {
       new ErrorResponse(`Order not found on this id ${req.params.id}`, 404)
     );
   }
-  if (order.user.toString() !== req.user.id) {
-    return next(new ErrorResponse(`authentication error`, 401));
-  }
+  order.user.toString() == req.user.id;
   let product = await Product.findById(req.params.productId);
   // return counts value to first case
   product.count = product.count + order.quantity;
@@ -113,7 +111,7 @@ exports.updateOrder = asyncHandler(async (req, res, next) => {
       new: true,
     }
   );
-  //uupdate counts according to new case
+  //update counts according to new case
   product.count = product.count - order.quantity;
   await product.save();
   return res.status(200).json({ success: true, data: order });
@@ -129,6 +127,8 @@ exports.removeOrder = asyncHandler(async (req, res, next) => {
       new ErrorResponse(`Order not found on this id ${req.params.id}`, 404)
     );
   }
+  order.user.toString() == req.user.id;
+
   let product = await Product.findById(req.params.productId);
   // return counts value to first case
   product.count = product.count + order.quantity;

@@ -9,13 +9,15 @@ const {
   updateLocation,
   gettUserLocation,
 } = require("../controllers/locations");
-const { acceessRoles, protect } = require("../middleware/auth");
+const { protect } = require("../middleware/auth");
 
-router.route("/").get(getLocations).post(addLocation).get(gettUserLocation);
+router.route("/").get(getLocations).post(protect, addLocation);
 router
   .route("/:id")
   .get(getLocationById)
-  .put(protect, acceessRoles("user", "admin"), updateLocation)
-  .delete(protect, acceessRoles("admin", "user"), deleteLocation);
+  .put(protect, updateLocation)
+  .delete(protect, deleteLocation);
+
+router.route("/user").get(protect, gettUserLocation);
 
 module.exports = router;

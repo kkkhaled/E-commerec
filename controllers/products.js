@@ -30,9 +30,7 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 //Get products for single user
 //route /api/v1/products/user
 exports.getProductsByUser = asyncHandler(async (req, res, next) => {
-  const products = await Product.find(
-    mongoose.Types.Object(req.user.id)
-  ).exec();
+  const products = await Product.find({ user: req.user.id }).exec();
   if (!products) {
     return next(new ErrorResponse(`no products found for this user`, 404));
   }

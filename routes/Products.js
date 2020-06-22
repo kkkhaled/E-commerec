@@ -41,7 +41,7 @@ router
   .post(protect, addOrder)
   .put(protect, updateOrder)
   .delete(protect, removeOrder)
-  .get(protect, getOrderByProduct);
+  .get(getOrderByProduct);
 
 router
   .route("/:productId/review")

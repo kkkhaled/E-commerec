@@ -46,7 +46,7 @@ userSchema.methods.createToken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRE,
   });
-  console.log(this);
+  //console.log(this);
 };
 // bcrypt password
 userSchema.pre("save", async function (next) {
